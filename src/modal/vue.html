@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Vue - Modal</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+  </head>
+  <body>
+    <div id="app"></div>
+
+    <script>
+      Vue.component("modal", {
+        props: ["isOpen"],
+        data: function() {
+          return {
+            count: 0
+          };
+        },
+        template: `<div class="overlay" v-if="isOpen">
+<div class="dialog"><slot></slot></div>
+</div>`
+      });
+
+      new Vue({
+        el: "#app",
+        data: {
+          isOpen: false
+        },
+        methods: {
+          onHideModalClick: function() {
+            this.isOpen = false;
+          },
+          onShowModalClick: function() {
+            this.isOpen = true;
+          }
+        },
+        template: `<div>
+          <h1>Modal</h1>
+          <button @click="onShowModalClick">Show modal</button>
+          <modal :isOpen="isOpen">
+            <h1>Modal title</h1>
+            <p>Modal description paragraph</p>
+            <button @click="onHideModalClick">Close modal</button>
+          </modal>
+        </div>`
+      });
+    </script>
+  </body>
+</html>

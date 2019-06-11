@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>React - Modal</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="https://unpkg.com/react@16/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
+  </head>
+  <body>
+    <div id="app"></div>
+
+    <script>
+      "use strict";
+      const e = React.createElement;
+
+      class Modal extends React.Component {
+        parent = document.body;
+        node = document.createElement("div");
+        componentDidMount() {
+          this.parent.appendChild(this.node);
+        }
+        componentWillUnmount() {
+          this.parent.removeChild(this.node);
+        }
+        render() {
+          const { children, isOpen } = this.props;
+          return isOpen
+            ? ReactDOM.createPortal(
+                e(
+                  "div",
+                  { className: "overlay" },
+                  e("div", { className: "dialog" }, children)
+                ),
+                this.node
+              )
+            : null;
+        }
+      }
+
+      class App extends React.Component {
+        state = {
+          isOpen: true
+        };
+        onShowModalClick = () => {
+          this.setState({ isOpen: true });
+        };
+        onHideModalClick = () => {
+          this.setState({ isOpen: false });
+        };
+        render() {
+          const { isOpen } = this.state;
+          return e("div", {}, [
+            e("h1", { key: "title" }, "Modal"),
+            e(
+              "button",
+              { key: "buttonShow", onClick: this.onShowModalClick },
+              "Show modal"
+            ),
+            e(Modal, { key: "modal", isOpen }, [
+              e("h1", { key: "modalTitle" }, "Modal title"),
+              e("p", { key: "modalParagraph" }, "Modal description paragraph."),
+              e(
+                "button",
+                { key: "modalButton", onClick: this.onHideModalClick },
+                "Close modal"
+              )
+            ])
+          ]);
+        }
+      }
+
+      ReactDOM.render(e(App), document.getElementById("app"));
+    </script>
+  </body>
+</html>
