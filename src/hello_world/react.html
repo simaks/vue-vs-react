@@ -1,15 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>Hello world</title>
-    <script
-      src="https://unpkg.com/react@16/umd/react.development.js"
-      crossorigin
-    ></script>
-    <script
-      src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"
-      crossorigin
-    ></script>
+    <title>React Hello</title>
+    <script src="https://unpkg.com/react@16/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
   </head>
   <body>
     <div id="app"></div>
@@ -17,10 +11,19 @@
     <script>
       "use strict";
 
-      ReactDOM.render(
-        React.createElement("h1", {}, "Hello world!"),
-        document.getElementById("app")
-      );
+      const e = React.createElement;
+
+      class App extends React.Component {
+        state = {
+          hello: "Hello World!"
+        };
+        render() {
+          const { hello } = this.state;
+          return e("h1", {}, hello);
+        }
+      }
+
+      ReactDOM.render(e(App), document.getElementById("app"));
     </script>
   </body>
 </html>

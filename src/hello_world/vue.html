@@ -1,20 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>Hello world</title>
+    <title>Vue Hello</title>
     <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
   </head>
   <body>
-    <div id="app">
-      <h1>{{hello}}</h1>
-    </div>
+    <div id="app"></div>
 
     <script>
+      "use strict";
+
       new Vue({
         el: "#app",
         data: {
           hello: "Hello World!"
-        }
+        },
+        template: `<div>
+          <h1>{{hello}}</h1>
+        </div>`
       });
     </script>
   </body>
