@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Vue messenger</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+  </head>
+  <body>
+    <div id="app1"></div>
+    <div id="app2"></div>
+    <div id="app3"></div>
+
+    <script>
+      const Messenger = Vue.extend({
+        name: "Messenger",
+        props: ["user"],
+        data: function() {
+          return {
+            messages: [],
+            newMessage: ""
+          };
+        },
+        created: function() {
+          this.$eventBus.$on("new-message", newMessage => {
+            this.messages.push(newMessage);
+          });
+        },
+        methods: {
+          sendMessage: function(message) {
+            this.$eventBus.$emit("new-message", message);
+          },
+          handleFormSubmit: function(event) {
+            if (this.newMessage) {
+              this.sendMessage({
+                user: this.user,
+                message: this.newMessage
+              });
+              this.newMessage = "";
+            }
+          }
+        },
+        template: `<div class="chat">
+          <h2>{{ user }}</h2>
+          <ul class="chat__message-list">
+            <li
+              v-for="m in messages" class="chat__message"
+              :class="{ ['chat__message--mine']: m.user === user }"
+            >
+              <b>{{ m.user }}</b>: {{ m.message }}
+            </li>
+          </ul>
+          <form @submit.prevent="handleFormSubmit">
+            <input type="text" v-model="newMessage">
+            <button type="submit">send</button>
+          </form>
+        </div>`
+      });
+
+      Vue.prototype.$eventBus = new Vue();
+
+      new Vue({
+        el: "#app1",
+        components: { Messenger },
+        template: `<Messenger user="one" />`
+      });
+      new Vue({
+        el: "#app2",
+        components: { Messenger },
+        template: `<Messenger user="two" />`
+      });
+      new Vue({
+        el: "#app3",
+        components: { Messenger },
+        template: `<Messenger user="three" />`
+      });
+    </script>
+  </body>
+</html>
