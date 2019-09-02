@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>React Messenger</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="https://unpkg.com/react@16/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
+  </head>
+  <body>
+    <div class="chat" id="app1"></div>
+    <div class="chat" id="app2"></div>
+    <div class="chat" id="app3"></div>
+
+    <script>
+      "use strict";
+
+      const e = React.createElement;
+      const eventBus = document.createElement("div");
+
+      class Messenger extends React.Component {
+        state = {
+          messages: [],
+          newMessage: ""
+        };
+
+        componentDidMount() {
+          eventBus.addEventListener("new-message", this.receiveMessage);
+        }
+
+        receiveMessage = event => {
+          const { messages } = this.state;
+          this.setState({ messages: [...messages, event.detail] });
+        };
+
+        sendMessage = () => {
+          const { newMessage } = this.state;
+          const { user } = this.props;
+          eventBus.dispatchEvent(
+            new CustomEvent("new-message", {
+              detail: {
+                message: newMessage,
+                user
+              }
+            })
+          );
+          this.setState({ newMessage: "" });
+        };
+
+        handleSubmit = event => {
+          event.preventDefault();
+          this.sendMessage();
+        };
+
+        handleMessageChange = event => {
+          this.setState({ newMessage: event.target.value });
+        };
+
+        render() {
+          const { user } = this.props;
+          const { messages, newMessage } = this.state;
+          return [
+            e("h2", { key: "username" }, user),
+            e(
+              "ul",
+              {
+                key: "message-list",
+                className: "chat__message-list"
+              },
+              messages.map((message, index) => {
+                const active = true;
+                const classNames = ["chat__message"];
+                if (message.user === user) {
+                  classNames.push("chat__message--mine");
+                }
+                return e(
+                  "li",
+                  {
+                    className: classNames.join(" "),
+                    key: index
+                  },
+                  `${message.user}: ${message.message}`
+                );
+              })
+            ),
+            e("form", { onSubmit: this.handleSubmit, key: "form" }, [
+              e("input", {
+                value: newMessage,
+                key: "input",
+                onChange: this.handleMessageChange
+              }),
+              " ",
+              e("button", { key: "button" }, "send")
+            ])
+          ];
+        }
+      }
+
+      class App1 extends React.Component {
+        render() {
+          return e(Messenger, { user: "one" });
+        }
+      }
+
+      class App2 extends React.Component {
+        render() {
+          return e(Messenger, { user: "two" });
+        }
+      }
+
+      class App3 extends React.Component {
+        render() {
+          return e(Messenger, { user: "three" });
+        }
+      }
+
+      ReactDOM.render(e(App1), document.getElementById("app1"));
+      ReactDOM.render(e(App2), document.getElementById("app2"));
+      ReactDOM.render(e(App3), document.getElementById("app3"));
+    </script>
+  </body>
+</html>
