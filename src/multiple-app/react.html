@@ -35,14 +35,17 @@
         sendMessage = () => {
           const { newMessage } = this.state;
           const { user } = this.props;
-          eventBus.dispatchEvent(
-            new CustomEvent("new-message", {
-              detail: {
-                message: newMessage,
-                user
-              }
-            })
-          );
+          const message = newMessage.trim();
+          if (message) {
+            eventBus.dispatchEvent(
+              new CustomEvent("new-message", {
+                detail: {
+                  message: newMessage,
+                  user
+                }
+              })
+            );
+          }
           this.setState({ newMessage: "" });
         };
 
