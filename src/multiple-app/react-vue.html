@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>React Messenger</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="https://unpkg.com/react@16/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+  </head>
+  <body>
+    <div class="chat" id="app-react"></div>
+    <div class="chat" id="app-vue"></div>
+
+    <script>
+      class EventBus {
+        list = [];
+
+        on = (name, fn) => {
+          if (!this.list[name]) {
+            this.list[name] = [];
+          }
+          this.list[name].push(fn);
+        };
+
+        emit = (name, data) => {
+          this.list[name].forEach(fn => fn(data));
+        };
+
+        off = (name, fn) => {
+          this.list[name] = this.list[name].filter(lfn => lfn !== fn);
+        };
+      }
+      const eventBus = new EventBus();
+    </script>
+
+    <script>
+      (function() {
+        const e = React.createElement;
+
+        class Messenger extends React.Component {
+          state = {
+            messages: [],
+            newMessage: ""
+          };
+
+          componentDidMount() {
+            eventBus.on("new-message", this.receiveMessage);
+          }
+
+          componentWillUnmount() {
+            eventBus.on("new-message", this.receiveMessage);
+          }
+
+          receiveMessage = data => {
+            const { messages } = this.state;
+            this.setState({ messages: [...messages, data] });
+          };
+
+          sendMessage = () => {
+            const { newMessage } = this.state;
+            const { user } = this.props;
+            const message = newMessage.trim();
+            if (message) {
+              eventBus.emit("new-message", { message: newMessage, user });
+            }
+            this.setState({ newMessage: "" });
+          };
+
+          handleSubmit = event => {
+            event.preventDefault();
+            this.sendMessage();
+          };
+
+          handleMessageChange = event => {
+            this.setState({ newMessage: event.target.value });
+          };
+
+          render() {
+            const { user } = this.props;
+            const { messages, newMessage } = this.state;
+            return [
+              e("h2", { key: "username" }, user),
+              e(
+                "ul",
+                {
+                  key: "message-list",
+                  className: "chat__message-list"
+                },
+                messages.map((message, index) => {
+                  const active = true;
+                  const classNames = ["chat__message"];
+                  if (message.user === user) {
+                    classNames.push("chat__message--mine");
+                  }
+                  return e(
+                    "li",
+                    {
+                      className: classNames.join(" "),
+                      key: index
+                    },
+                    `${message.user}: ${message.message}`
+                  );
+                })
+              ),
+              e("form", { onSubmit: this.handleSubmit, key: "form" }, [
+                e("input", {
+                  value: newMessage,
+                  key: "input",
+                  onChange: this.handleMessageChange
+                }),
+                " ",
+                e("button", { key: "button" }, "send")
+              ])
+            ];
+          }
+        }
+
+        class App extends React.Component {
+          render() {
+            return e(Messenger, { user: "React" });
+          }
+        }
+
+        ReactDOM.render(e(App), document.getElementById("app-react"));
+      })();
+    </script>
+
+    <script>
+      (function() {
+        const Messenger = Vue.extend({
+          name: "Messenger",
+          props: ["user"],
+          data: function() {
+            return {
+              messages: [],
+              newMessage: ""
+            };
+          },
+          created: function() {
+            eventBus.on("new-message", this.receiveMessage);
+          },
+          beforeDestroy: function() {
+            eventBus.on("new-message", this.receiveMessage);
+          },
+          methods: {
+            receiveMessage: function(newMessage) {
+              this.messages.push(newMessage);
+            },
+            sendMessage: function(message) {
+              eventBus.emit("new-message", message);
+            },
+            handleFormSubmit: function(event) {
+              if (this.newMessage) {
+                this.sendMessage({
+                  user: this.user,
+                  message: this.newMessage
+                });
+                this.newMessage = "";
+              }
+            }
+          },
+          template: `<div class="chat">
+          <h2>{{ user }}</h2>
+          <ul class="chat__message-list">
+            <li
+              v-for="m in messages" class="chat__message"
+              :class="{ ['chat__message--mine']: m.user === user }"
+            >
+              <b>{{ m.user }}</b>: {{ m.message }}
+            </li>
+          </ul>
+          <form @submit.prevent="handleFormSubmit">
+            <input type="text" v-model="newMessage">
+            <button type="submit">send</button>
+          </form>
+        </div>`
+        });
+
+        Vue.prototype.$eventBus = new Vue();
+
+        new Vue({
+          el: "#app-vue",
+          components: { Messenger },
+          template: `<Messenger user="Vue" />`
+        });
+      })();
+    </script>
+  </body>
+</html>
