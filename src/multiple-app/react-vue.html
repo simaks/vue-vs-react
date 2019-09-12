@@ -48,7 +48,7 @@
           }
 
           componentWillUnmount() {
-            eventBus.on("new-message", this.receiveMessage);
+            eventBus.off("new-message", this.receiveMessage);
           }
 
           receiveMessage = data => {
@@ -140,7 +140,7 @@
             eventBus.on("new-message", this.receiveMessage);
           },
           beforeDestroy: function() {
-            eventBus.on("new-message", this.receiveMessage);
+            eventBus.off("new-message", this.receiveMessage);
           },
           methods: {
             receiveMessage: function(newMessage) {
